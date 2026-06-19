@@ -192,6 +192,14 @@ $$(".magnetic").forEach((element) => {
   });
 });
 
+$$(".reel video").forEach((video) => {
+  video.addEventListener("play", () => {
+    $$(".reel video").forEach((otherVideo) => {
+      if (otherVideo !== video) otherVideo.pause();
+    });
+  });
+});
+
 const hours = $("#hours");
 const hoursText = $("#hoursText");
 const currentCost = $("#currentCost");
@@ -328,7 +336,39 @@ if (typeform) {
   const backButton = $(".step-back");
   const progressCapsule = $(".progress-capsule");
   const progressDots = $$(".form-progress-dots i");
+  const phoneInput = typeform.elements.phone;
   let currentStep = 0;
+
+  phoneInput?.addEventListener("input", () => {
+    const digits = phoneInput.value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length > 6) {
+      phoneInput.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    } else if (digits.length > 2) {
+      phoneInput.value = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else {
+      phoneInput.value = digits;
+    }
+  });
+
+  function validateCurrentStep() {
+    const activeStep = steps[currentStep];
+    const fields = [...activeStep.querySelectorAll("input, select")];
+    return fields.every((field) => field.reportValidity());
+  }
+
+  function openCommercialWhatsApp() {
+    const data = new FormData(typeform);
+    const message = [
+      "Olá, quero avaliar o TowPower na minha operação.",
+      "",
+      `Operação: ${data.get("operation")}`,
+      `Principal objetivo: ${data.get("pain")}`,
+      `Manobras por semana: ${data.get("moves")}`,
+      `Nome: ${data.get("name")}`,
+      `WhatsApp para retorno: ${data.get("phone")}`,
+    ].join("\n");
+    window.open(`https://wa.me/5511942907982?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
 
   function renderStep() {
     steps.forEach((step, index) => step.classList.toggle("is-active", index === currentStep));
@@ -337,7 +377,7 @@ if (typeform) {
     typeform.classList.toggle("is-complete", currentStep === steps.length - 1);
     progressDots.forEach((dot, index) => dot.classList.toggle("is-reached", index <= Math.min(currentStep, progressDots.length - 1)));
     progressCapsule.style.width = `${32 + Math.min(currentStep, progressDots.length - 1) * 56}px`;
-    nextLabel.textContent = currentStep >= steps.length - 2 ? "Solicitar contato comercial" : "Continuar";
+    nextLabel.textContent = currentStep >= steps.length - 2 ? "Falar com especialista no WhatsApp" : "Continuar";
     if (currentStep === steps.length - 1) {
       nextLabel.textContent = "Nova solicitação";
       backButton.disabled = true;
@@ -349,6 +389,8 @@ if (typeform) {
       typeform.reset();
       currentStep = 0;
     } else {
+      if (!validateCurrentStep()) return;
+      if (currentStep === steps.length - 2) openCommercialWhatsApp();
       currentStep += 1;
     }
     renderStep();
