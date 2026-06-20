@@ -595,8 +595,10 @@ h2 {
   overflow: hidden;
 }
 .metric { padding: 34px; background: rgba(5,11,18,.76); backdrop-filter: blur(18px); }
-.metric strong { display: block; color: var(--color-amber); font-size: clamp(44px, 6vw, 78px); line-height: .9; margin-bottom: 14px; }
+.metric strong { display: flex; align-items: baseline; gap: 5px; color: var(--color-amber); font-size: clamp(44px, 6vw, 78px); line-height: .9; margin-bottom: 14px; }
+.metric strong em { font-size: .38em; font-style: normal; }
 .metric span { color: rgba(255,255,255,.76); line-height: 1.45; }
+.metric strong span { color: inherit; line-height: inherit; }
 
 .roi { display: grid; grid-template-columns: .9fr .8fr; gap: clamp(34px, 8vw, 96px); align-items: center; }
 .calculator, .lead-form {
@@ -1420,6 +1422,51 @@ footer {
   }
   .proof-video-actions .button { width: 100%; }
   .demo-lead { font-size: 15px; }
+  .metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,.12);
+  }
+  .metric {
+    min-width: 0;
+    padding: 22px 14px;
+    background: rgba(5,11,18,.78);
+    border-left: 1px solid rgba(255,255,255,.12);
+  }
+  .metric-primary {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: end;
+    gap: 16px;
+    padding: 28px 22px;
+    border-left: 0;
+    border-bottom: 1px solid rgba(255,255,255,.14);
+    background:
+      linear-gradient(110deg, rgba(27,109,255,.18), transparent 55%),
+      rgba(5,11,18,.82);
+  }
+  .metric:nth-child(2) { border-left: 0; }
+  .metric strong {
+    gap: 3px;
+    margin-bottom: 10px;
+    font-size: 40px;
+  }
+  .metric-primary strong {
+    margin: 0;
+    font-size: 70px;
+  }
+  .metric > span {
+    display: block;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .metric-primary > span {
+    padding-bottom: 6px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
   .testimonial-section {
     display: block;
     padding-top: 72px;
