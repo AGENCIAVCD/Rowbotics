@@ -1064,7 +1064,18 @@ footer {
   border-top: 1px solid rgba(255,255,255,.1);
 }
 
-.js .reveal { opacity: 0; transform: translateY(34px); }
+.js .reveal {
+  opacity: var(--scene-opacity, 0);
+  transform:
+    translate3d(0, var(--scene-shift, 34px), 0)
+    scale(var(--scene-scale, .985));
+  filter: blur(var(--scene-blur, 3px));
+  transform-origin: 50% 50%;
+  will-change: opacity, transform, filter;
+}
+.js .reveal.scroll-scene {
+  transition: opacity 90ms linear, transform 90ms linear, filter 90ms linear;
+}
 .word { display: inline-block; overflow: hidden; vertical-align: top; }
 .js .word > span { display: inline-block; transform: translateY(110%); }
 .word > span { display: inline-block; }
@@ -1279,6 +1290,7 @@ footer {
 }
 
 @media (max-width: 540px) {
+  .js .reveal { filter: none; }
   .site-header { height: 68px; }
   .site-header::before { inset: 10px 12px; }
   .brand { width: 126px; min-width: 126px; }
@@ -1502,5 +1514,6 @@ footer {
   .word > span {
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
   }
 }

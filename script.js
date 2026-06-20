@@ -94,30 +94,21 @@ if (!reduceMotion) {
   });
 }
 
-const revealObserver = new IntersectionObserver(
+const scrollScenes = $$(".reveal");
+scrollScenes.forEach((element) => element.classList.add("scroll-scene"));
+
+const metricObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      if (reduceMotion) {
-        entry.target.style.opacity = "1";
-        entry.target.style.transform = "none";
-      } else {
-        motion({
-          targets: entry.target,
-          opacity: [0, 1],
-          translateY: [34, 0],
-          duration: 780,
-          easing: "easeOutCubic",
-        });
-      }
       if (entry.target.classList.contains("metric")) animateMetric(entry.target);
-      revealObserver.unobserve(entry.target);
+      metricObserver.unobserve(entry.target);
     });
   },
-  { threshold: 0.18 }
+  { threshold: 0.35 }
 );
 
-$$(".reveal").forEach((element) => revealObserver.observe(element));
+$$(".metric").forEach((element) => metricObserver.observe(element));
 
 function animateMetric(metric) {
   const target = metric.querySelector("[data-count]");
@@ -138,6 +129,36 @@ const header = $(".site-header");
 const progress = $(".scroll-progress");
 const cinemaImage = $(".cinema-panel img");
 const topAction = $(".top-action");
+let scrollFrame = 0;
+
+function clamp(value, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function easeOutCubic(value) {
+  return 1 - Math.pow(1 - value, 3);
+}
+
+function updateScrollScenes() {
+  if (reduceMotion) return;
+  const viewportHeight = window.innerHeight;
+  const enterDistance = Math.min(360, viewportHeight * 0.42);
+  const exitDistance = Math.min(280, viewportHeight * 0.34);
+
+  scrollScenes.forEach((element) => {
+    const rect = element.getBoundingClientRect();
+    const entering = clamp((viewportHeight - rect.top) / enterDistance);
+    const exiting = clamp(rect.bottom / exitDistance);
+    const presence = Math.min(entering, exiting);
+    const easedPresence = easeOutCubic(presence);
+    const shift = entering < exiting ? (1 - entering) * 42 : (1 - exiting) * -24;
+
+    element.style.setProperty("--scene-opacity", String(0.12 + easedPresence * 0.88));
+    element.style.setProperty("--scene-shift", `${shift.toFixed(2)}px`);
+    element.style.setProperty("--scene-scale", String(0.978 + easedPresence * 0.022));
+    element.style.setProperty("--scene-blur", `${((1 - easedPresence) * 3).toFixed(2)}px`);
+  });
+}
 
 function updateScroll() {
   const max = document.documentElement.scrollHeight - innerHeight;
@@ -150,10 +171,24 @@ function updateScroll() {
     const movement = Math.max(-60, Math.min(60, rect.top * -0.06));
     cinemaImage.style.setProperty("--parallax", `${movement}px`);
   }
+  updateScrollScenes();
 }
 
-window.addEventListener("scroll", updateScroll, { passive: true });
+function requestScrollUpdate() {
+  if (scrollFrame) return;
+  scrollFrame = requestAnimationFrame(() => {
+    scrollFrame = 0;
+    updateScroll();
+  });
+}
+
+window.addEventListener("scroll", requestScrollUpdate, { passive: true });
+window.addEventListener("resize", requestScrollUpdate, { passive: true });
+window.addEventListener("load", requestScrollUpdate, { once: true });
+window.addEventListener("hashchange", requestScrollUpdate);
 updateScroll();
+requestAnimationFrame(requestScrollUpdate);
+window.setTimeout(requestScrollUpdate, 180);
 
 topAction?.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
