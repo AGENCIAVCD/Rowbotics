@@ -294,7 +294,7 @@ if (testimonialStack) {
     dot.type = "button";
     dot.setAttribute("role", "tab");
     dot.setAttribute("aria-label", `Exibir cenário ${index + 1}`);
-    dot.addEventListener("click", () => showTestimonial(index, index > testimonialIndex ? 1 : -1));
+    dot.addEventListener("click", () => showTestimonial(index, index > testimonialIndex ? -1 : 1));
     testimonialDots.appendChild(dot);
   });
 
@@ -317,11 +317,13 @@ if (testimonialStack) {
     testimonialCard.classList.add("is-exiting");
     testimonialCard.style.transform = `translateX(${exit}%) rotate(${direction * 10}deg)`;
     window.setTimeout(() => {
+      testimonialCard.classList.add("is-resetting");
       testimonialIndex = (nextIndex + testimonialData.length) % testimonialData.length;
       renderTestimonial();
       testimonialCard.classList.remove("is-exiting");
-      testimonialCard.style.transform = `translateX(${-direction * 16}%) rotate(${-direction * 3}deg)`;
+      testimonialCard.style.transform = `translateX(${-direction * 22}%) rotate(${-direction * 4}deg)`;
       requestAnimationFrame(() => {
+        testimonialCard.classList.remove("is-resetting");
         requestAnimationFrame(() => {
           testimonialCard.style.transform = "";
         });
@@ -358,8 +360,8 @@ if (testimonialStack) {
     testimonialCard.classList.remove("is-dragging");
     testimonialCard.style.transform = "";
   });
-  $(".testimonial-prev").addEventListener("click", () => showTestimonial(testimonialIndex - 1, -1));
-  $(".testimonial-next").addEventListener("click", () => showTestimonial(testimonialIndex + 1, 1));
+  $(".testimonial-prev").addEventListener("click", () => showTestimonial(testimonialIndex - 1, 1));
+  $(".testimonial-next").addEventListener("click", () => showTestimonial(testimonialIndex + 1, -1));
   renderTestimonial();
 }
 
